@@ -37,7 +37,6 @@ slimmingTask = cms.Task(
     offlineSlimmedPrimaryVertices,
     primaryVertexAssociation,
     genParticlesTask,
-    packedCandidateToGenAssociationTask,
     selectedPatTrigger,
     slimmedPatTrigger,
     slimmedCaloJets,
@@ -76,3 +75,8 @@ from Configuration.Eras.Modifier_phase2_timing_cff import phase2_timing
 _phase2_timing_slimmingTask = cms.Task(slimmingTask.copy(),
                                        offlineSlimmedPrimaryVertices4D)
 phase2_timing.toReplaceWith(slimmingTask,_phase2_timing_slimmingTask)
+
+from Configuration.Eras.Modifier_bParking_cff import bParking
+_bParking_slimmingTask = cms.Task(slimmingTask.copy(),packedCandidateToGenAssociationTask)
+bParking.roReplaceWith(slimmingTask,_bParking_slimmingTask)
+
