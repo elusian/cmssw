@@ -16,7 +16,7 @@
 #include "CAStructures.h"
 #include "CACell.h"
 
-// #define GPU_DEBUG
+#define GPU_DEBUG
 //#define NTUPLE_DEBUG
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
   namespace caPixelDoublets {
@@ -310,7 +310,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 //      #endif
 #ifdef GPU_DEBUG
         if (tooMany > 0 or tot > 0)
-          printf("OuterHitOfCell for %d in layer %d/%d, %d,%d %d, %d %.3f %.3f\n",
+          printf("OuterHitOfCell for %d in layer %d/%d, %d,%d %d, %d %.3f %.3f %s\n",
                  i,
                  inner,
                  outer,

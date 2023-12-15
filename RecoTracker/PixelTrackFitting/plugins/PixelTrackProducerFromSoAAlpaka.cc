@@ -35,6 +35,7 @@
  * This class creates "legacy" reco::Track
  * objects from the output of SoA CA.
  */
+#define GPU_DEBUG
 
 template <typename TrackerTraits>
 class PixelTrackProducerFromSoAAlpaka : public edm::global::EDProducer<> {
