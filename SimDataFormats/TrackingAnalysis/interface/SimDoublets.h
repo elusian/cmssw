@@ -14,13 +14,11 @@
 #include <utility>
 #include <vector>
 
-
 // FIXME better move those definitions to the appropriate package for SiPixelRecHits
 // persistent reference to a SiPixelRecHit in a SiPixelRecHitCollection
 typedef edm::Ref<SiPixelRecHitCollection, SiPixelRecHit> SiPixelRecHitRef;
 // persistent vector of references to SiPixelRecHits in a SiPixelRecHitCollection
 typedef edm::RefVector<SiPixelRecHitCollection, SiPixelRecHit> SiPixelRecHitRefVector;
-
 
 /** @brief Semi-Monte Carlo truth information used for pixel-tracking opimization.
  *
@@ -46,7 +44,6 @@ typedef edm::RefVector<SiPixelRecHitCollection, SiPixelRecHit> SiPixelRecHitRefV
  */
 class SimDoublets {
 public:
-
   /**
      * Sub-class for true doublets of RecHits
      *  - first hit = inner RecHit
@@ -102,10 +99,9 @@ public:
     std::pair<SiPixelRecHitRef, SiPixelRecHitRef> recHitRefs_;  // reference pair to RecHits of the Doublet
     std::pair<uint8_t, uint8_t> layerIds_;                      // pair of layer IDs corresponding to the RecHits
     int8_t numSkippedLayers_;                                   // number of layers skipped by the Doublet
-    int16_t layerPairId_;     // ID of the layer pair as defined in the reconstruction for the doublets
+    int16_t layerPairId_;            // ID of the layer pair as defined in the reconstruction for the doublets
     GlobalVector beamSpotPosition_;  // global position of the beam spot (needed to correct the global RecHit position)
   };
-
 
   // default contructor
   SimDoublets() {}
@@ -116,9 +112,15 @@ public:
 
   // method to add a RecHitRef with its layer
   void addRecHit(SiPixelRecHitRef const recHitRef, uint8_t const layerId) {
+    recHitsAreSorted_ = false;  // set sorted to false again
+    // check if the layerId is not present in the layerIdVector yet
+    if (std::find(layerIdVector_.begin(), layerIdVector_.end(), layerId) == layerIdVector_.end()) {
+      // if it does not exist, increment number of layers
+      numLayers_++;
+    }
+    // add recHit and layerId to the vectors
     recHitRefVector_.push_back(recHitRef);
     layerIdVector_.push_back(layerId);
-    recHitsAreSorted_ = false;  // set sorted to false again
   }
 
   // method to access the reference to the TrackingParticle
@@ -135,9 +137,12 @@ public:
 
   // method to access the layer id at index i
   uint8_t layerIds(size_t i) const { return layerIdVector_[i]; }
-  
+
   // method to access the beam spot position
   GlobalVector beamSpotPosition() const { return beamSpotPosition_; }
+
+  // method to get the number of layers
+  int numLayers() const { return numLayers_; }
 
   // method to get number of RecHits in the SimDoublets
   int numRecHits() const { return layerIdVector_.size(); }
@@ -152,13 +157,12 @@ private:
   TrackingParticleRef trackingParticleRef_;  // reference to the TrackingParticle
   SiPixelRecHitRefVector recHitRefVector_;   // reference vector to RecHits associated to the TP (sorted afer building)
   std::vector<uint8_t> layerIdVector_;       // vector of layer IDs corresponding to the RecHits
-  GlobalVector beamSpotPosition_;        // global position of the beam spot (needed to correct the global RecHit position)
-  bool recHitsAreSorted_{false};  // true if RecHits were sorted
+  GlobalVector beamSpotPosition_;  // global position of the beam spot (needed to correct the global RecHit position)
+  bool recHitsAreSorted_{false};   // true if RecHits were sorted
+  int numLayers_{0};               // number of layers hit by the TrackingParticle
 };
-
 
 // collection of SimDoublets
 typedef std::vector<SimDoublets> SimDoubletsCollection;
-
 
 #endif

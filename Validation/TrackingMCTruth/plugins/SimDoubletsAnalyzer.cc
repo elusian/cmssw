@@ -80,6 +80,8 @@ private:
   // monitor elements (histograms) to be filled
   MonitorElement* h_layerPairs_;
   MonitorElement* h_numSkippedLayers_;
+  MonitorElement* h_numSimDoubletsPerTrackingParticle_;
+  MonitorElement* h_numLayersPerTrackingParticle_;
   MonitorElement* h_numTotVsPt_;
   MonitorElement* h_numPassVsPt_;
   MonitorElement* h_numTotVsEta_;
@@ -222,6 +224,10 @@ void SimDoubletsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
 
     // create the true RecHit doublets of the TrackingParticle
     auto doublets = simDoublets.getSimDoublets(trackerGeometry_);
+
+    // fill histogram for number of SimDoublets
+    h_numSimDoubletsPerTrackingParticle_->Fill(doublets.size());
+    h_numLayersPerTrackingParticle_->Fill(simDoublets.numLayers()); 
 
     // loop over those doublets
     for (auto const& doublet : doublets) {
@@ -404,6 +410,10 @@ void SimDoubletsAnalyzer::bookHistograms(DQMStore::IBooker& ibook, edm::Run cons
       "layerPairs", "Layer pairs in SimDoublets; Inner layer ID; Outer layer ID", 28, -0.5, 27.5, 28, -0.5, 27.5);
   h_numSkippedLayers_ = ibook.book1D(
       "numSkippedLayers", "Number of skipped layers; Number of skipped layers; Number of SimDoublets", 16, -1.5, 14.5);
+  h_numSimDoubletsPerTrackingParticle_ = ibook.book1D(
+      "numSimDoubletsPerTrackingParticle", "Number of SimDoublets per Tracking Particle; Number of SimDoublets; Number of Tracking Particles", 31, -0.5, 30.5);
+  h_numLayersPerTrackingParticle_ = ibook.book1D(
+      "numLayersPerTrackingParticle", "Number of layers hit by Tracking Particle; Number of layers; Number of Tracking Particles", 29, -0.5, 28.5);
   h_numTotVsPt_ = simdoublets::make1DLogX(
       ibook,
       "numTotVsPt",
@@ -512,7 +522,7 @@ void SimDoubletsAnalyzer::bookHistograms(DQMStore::IBooker& ibook, edm::Run cons
     hVector_idphi_.at(layerPairIdIndex) =
         ibook.book1D("idphi",
                      "idphi of RecHit pair " + layerTitle +
-                         "; Absolute int d#phi between outer and inner RecHit [rad]; Number of SimDoublets",
+                         "; Absolute int d#phi between outer and inner RecHit; Number of SimDoublets",
                      50,
                      0,
                      1000);
