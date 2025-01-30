@@ -24,6 +24,7 @@
 #include "DataFormats/Histograms/interface/MonitorElementCollection.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/Math/interface/approx_atan2.h"
+#include "DataFormats/TrackerRecHit2D/interface/SiPixelRecHit.h"
 #include "SimDataFormats/TrackingAnalysis/interface/SimDoublets.h"
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
 #include "Geometry/CommonTopologies/interface/SimplePixelTopology.h"
@@ -82,6 +83,10 @@ private:
   MonitorElement* h_numSkippedLayers_;
   MonitorElement* h_numSimDoubletsPerTrackingParticle_;
   MonitorElement* h_numLayersPerTrackingParticle_;
+  MonitorElement* h_numTPTotVsPt_;
+  MonitorElement* h_numTPPassVsPt_;
+  MonitorElement* h_numTPTotVsEta_;
+  MonitorElement* h_numTPPassVsEta_;
   MonitorElement* h_numTotVsPt_;
   MonitorElement* h_numPassVsPt_;
   MonitorElement* h_numTotVsEta_;
@@ -151,6 +156,12 @@ namespace simdoublets {
     const auto& name = h->GetName();
     return ibook.book1D(name, h.release());
   }
+
+  template <typename T>
+  bool haveCommonElement(std::vector<T> const& v1, std::vector<T> const& v2) {
+    return std::find_first_of (v1.begin(), v1.end(),
+                               v2.begin(), v2.end()) != v1.end();
+  }
 }  // namespace simdoublets
 
 //
@@ -216,6 +227,10 @@ void SimDoubletsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
   // get simDoublets
   SimDoubletsCollection const& simDoubletsCollection = iEvent.get(simDoublets_getToken_);
 
+  // create vectors for inner and outer RecHits of SimDoublets passing all cuts
+  std::vector<SiPixelRecHitRef> innerRecHitsPassing;
+  std::vector<SiPixelRecHitRef> outerRecHitsPassing;
+
   // loop over SimDoublets (= loop over TrackingParticles)
   for (auto const& simDoublets : simDoubletsCollection) {
     // get true pT of the TrackingParticle
@@ -225,9 +240,20 @@ void SimDoubletsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
     // create the true RecHit doublets of the TrackingParticle
     auto doublets = simDoublets.getSimDoublets(trackerGeometry_);
 
-    // fill histogram for number of SimDoublets
-    h_numSimDoubletsPerTrackingParticle_->Fill(doublets.size());
-    h_numLayersPerTrackingParticle_->Fill(simDoublets.numLayers()); 
+    int numSimDoublets = doublets.size();
+    float weight = 1./float(numSimDoublets);
+
+    // fill histograms for number of SimDoublets
+    h_numSimDoubletsPerTrackingParticle_->Fill(numSimDoublets);
+    h_numLayersPerTrackingParticle_->Fill(simDoublets.numLayers());
+
+    // fill histograms for number of TrackingParticles
+    h_numTPTotVsPt_->Fill(true_pT);
+    h_numTPTotVsEta_->Fill(true_eta);
+
+    // clear passing inner and outer RecHits
+    innerRecHitsPassing.clear();
+    outerRecHitsPassing.clear();
 
     // loop over those doublets
     for (auto const& doublet : doublets) {
@@ -383,10 +409,20 @@ void SimDoubletsAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetu
       h_numTotVsEta_->Fill(true_eta);
       // fill histogram of doublets that pass all cuts
       if (!doubletGetsCut) {
-        h_numPassVsPt_->Fill(true_pT);
-        h_numPassVsEta_->Fill(true_eta);
+        h_numPassVsPt_->Fill(true_pT, weight);
+        h_numPassVsEta_->Fill(true_eta, weight);
+
+        // also put the inner/outer RecHit in the respective vector
+        innerRecHitsPassing.push_back(doublet.innerRecHit());
+        outerRecHitsPassing.push_back(doublet.outerRecHit());
       }
     }  // end loop over those doublets
+
+    // Now check if the TrackingParticle is reconstructable by at least two conencted SimDoublets surviving the cuts
+    if (simdoublets::haveCommonElement<SiPixelRecHitRef>(innerRecHitsPassing, outerRecHitsPassing)){
+      h_numTPPassVsPt_->Fill(true_pT);
+      h_numTPPassVsEta_->Fill(true_eta);
+    }
   }  // end loop over SimDoublets (= loop over TrackingParticles)
 }
 
@@ -410,36 +446,70 @@ void SimDoubletsAnalyzer::bookHistograms(DQMStore::IBooker& ibook, edm::Run cons
       "layerPairs", "Layer pairs in SimDoublets; Inner layer ID; Outer layer ID", 28, -0.5, 27.5, 28, -0.5, 27.5);
   h_numSkippedLayers_ = ibook.book1D(
       "numSkippedLayers", "Number of skipped layers; Number of skipped layers; Number of SimDoublets", 16, -1.5, 14.5);
-  h_numSimDoubletsPerTrackingParticle_ = ibook.book1D(
-      "numSimDoubletsPerTrackingParticle", "Number of SimDoublets per Tracking Particle; Number of SimDoublets; Number of Tracking Particles", 31, -0.5, 30.5);
-  h_numLayersPerTrackingParticle_ = ibook.book1D(
-      "numLayersPerTrackingParticle", "Number of layers hit by Tracking Particle; Number of layers; Number of Tracking Particles", 29, -0.5, 28.5);
+  h_numSimDoubletsPerTrackingParticle_ =
+      ibook.book1D("numSimDoubletsPerTrackingParticle",
+                   "Number of SimDoublets per Tracking Particle; Number of SimDoublets; Number of Tracking Particles",
+                   31,
+                   -0.5,
+                   30.5);
+  h_numLayersPerTrackingParticle_ =
+      ibook.book1D("numLayersPerTrackingParticle",
+                   "Number of layers hit by Tracking Particle; Number of layers; Number of Tracking Particles",
+                   29,
+                   -0.5,
+                   28.5);
+  h_numTPTotVsPt_ = simdoublets::make1DLogX(
+      ibook,
+      "numTPTotVsPt",
+      "Total number of TrackingParticles; True transverse momentum p_{T} [GeV]; Total number of TrackingParticles",
+      pTNBins,
+      pTmin,
+      pTmax);
+  h_numTPPassVsPt_ = simdoublets::make1DLogX(ibook,
+                                             "numTPPassVsPt",
+                                             "Reconstructable TrackingParticles (two or more connected SimDoublets "
+                                             "pass cuts); True transverse momentum p_{T} [GeV]; "
+                                             "Number of reconstructable TrackingParticles",
+                                             pTNBins,
+                                             pTmin,
+                                             pTmax);
+  h_numTPTotVsEta_ =
+      ibook.book1D("numTPTotVsEta",
+                   "Total number of TrackingParticles; True pseudorapidity #eta; Total number of TrackingParticles",
+                   etaNBins,
+                   etamin,
+                   etamax);
+  h_numTPPassVsEta_ = ibook.book1D("numTPPassVsEta",
+                                   "Reconstructable TrackingParticles (two or more connected SimDoublets "
+                                   "pass cuts); True pseudorapidity #eta; Number of reconstructable TrackingParticles",
+                                   etaNBins,
+                                   etamin,
+                                   etamax);
   h_numTotVsPt_ = simdoublets::make1DLogX(
       ibook,
       "numTotVsPt",
-      "Total number of SimDoublets; True transverse momentum p_{T} [GeV]; Total number of valid SimDoublets",
+      "Total number of SimDoublets; True transverse momentum p_{T} [GeV]; Total number of SimDoublets",
       pTNBins,
       pTmin,
       pTmax);
   h_numPassVsPt_ = simdoublets::make1DLogX(ibook,
                                            "numPassVsPt",
-                                           "Number of passing SimDoublets; True transverse momentum p_{T} [GeV]; "
-                                           "Number of valid SimDoublets passing all cuts",
+                                           "Weighted number of passing SimDoublets; True transverse momentum p_{T} [GeV]; "
+                                           "Number of SimDoublets passing all cuts",
                                            pTNBins,
                                            pTmin,
                                            pTmax);
-  h_numTotVsEta_ =
-      ibook.book1D("numTotVsEta",
-                   "Total number of SimDoublets; True pseudorapidity #eta; Total number of valid SimDoublets",
+  h_numTotVsEta_ = ibook.book1D("numTotVsEta",
+                                "Total number of SimDoublets; True pseudorapidity #eta; Total number of SimDoublets",
+                                etaNBins,
+                                etamin,
+                                etamax);
+  h_numPassVsEta_ =
+      ibook.book1D("numPassVsEta",
+                   "Weighted number of SimDoublets; True pseudorapidity #eta; Number of SimDoublets passing all cuts",
                    etaNBins,
                    etamin,
                    etamax);
-  h_numPassVsEta_ = ibook.book1D(
-      "numPassVsEta",
-      "Total number of SimDoublets; True pseudorapidity #eta; Number of valid SimDoublets passing all cuts",
-      etaNBins,
-      etamin,
-      etamax);
 
   // histogram for z0cutoff  (z0Cut)
   h_z0_ = ibook.book1D("z0", "z_{0}; Longitudinal impact parameter z_{0} [cm]; Number of SimDoublets", 51, -1, 50);

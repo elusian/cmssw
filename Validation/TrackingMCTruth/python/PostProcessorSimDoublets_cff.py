@@ -21,8 +21,10 @@ _defaultSubdirs = ["Tracking/TrackingMCTruth/SimDoublets"]
 postProcessorSimDoublets = DQMEDHarvester("DQMGenericClient",
     subDirs = cms.untracked.vstring(_defaultSubdirs),
     efficiency = cms.vstring(
-        "efficiency_vs_pT 'Efficiency vs p_{T}; True transverse momentum p_{T} [GeV]; Efficiency for valid SimDoublets' numPassVsPt numTotVsPt",
-        "efficiency_vs_eta 'Efficiency vs #eta; True pseudorapidity #eta; Efficiency for valid SimDoublets' numPassVsEta numTotVsEta"
+        "efficiency_vs_pT 'SimDoublets efficiency per TP vs p_{T}; TP transverse momentum p_{T} [GeV]; Average fraction of SimDoublets per TP passing all cuts' numPassVsPt numTPTotVsPt",
+        "efficiency_vs_eta 'SimDoublets efficiency vs #eta; TP pseudorapidity #eta; Average fraction of SimDoublets per TP passing all cuts' numPassVsEta numTPTotVsEta",
+        "efficiencyTP_vs_pT 'TrackingParticle efficiency (2 or more connected SimDoublets passing cuts); TP transverse momentum p_{T} [GeV]; Efficiency for TrackingParticles' numTPPassVsPt numTPTotVsPt",
+        "efficiencyTP_vs_eta 'TrackingParticle efficiency (2 or more connected SimDoublets passing cuts); TP pseudorapidity #eta; Efficiency for TrackingParticles' numTPPassVsEta numTPTotVsEta"
     ),
     resolution = cms.vstring(),
     cumulativeDists = cms.untracked.vstring(),
