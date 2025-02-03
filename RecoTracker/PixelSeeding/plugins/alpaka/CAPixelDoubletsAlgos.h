@@ -20,8 +20,8 @@
 #include "CACell.h"
 #include "CAStructures.h"
 
-//#define GPU_DEBUG
-//#define NTUPLE_DEBUG
+#define GPU_DEBUG
+#define NTUPLE_DEBUG
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE::caPixelDoublets {
   using namespace cms::alpakatools;
@@ -339,7 +339,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::caPixelDoublets {
 //      #endif
 #ifdef GPU_DEBUG
       if (tooMany > 0 or tot > 0)
-        printf("OuterHitOfCell for %d in layer %d/%d, %d,%d %d, %d %.3f %.3f %s\n",
+        printf("%d OuterHitOfCell for %d in layer %d/%d, nmin/tot %d/%d %d, %d %.3f %.3f %s\n",
+               *nCells,
                i,
                inner,
                outer,
@@ -347,11 +348,19 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::caPixelDoublets {
                tot,
                tooMany,
                iphicut,
-               cell.minzCut_[pairLayerId],
-               cell.maxzCut_[pairLayerId],
+               cuts.minzCut_[pairLayerId],
+               cuts.maxzCut_[pairLayerId],
                tooMany > 0 ? "FULL!!" : "not full.");
 #endif
     }  // loop in block...
+    for (uint32_t c = 0; c < *nCells; ++c) {
+      printf("cell %d has inner %d (%d) and outer %d (%d)\n",
+             c,
+             cells[c].inner_hit_id(),
+             hh[cells[c].inner_hit_id()].detectorIndex(),
+             cells[c].outer_hit_id(),
+             hh[cells[c].outer_hit_id()].detectorIndex());
+    }
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE::caPixelDoublets

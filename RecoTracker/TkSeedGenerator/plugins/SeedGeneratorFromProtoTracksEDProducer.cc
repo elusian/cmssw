@@ -147,14 +147,19 @@ void SeedGeneratorFromProtoTracksEDProducer::produce(edm::Event& ev, const edm::
         GlobalTrackingRegion region(mom_perp, vtx, 0.2, 0.2);
 
         seedCreator_.init(region, es, nullptr);
-        if (hits.size() > 3 and not includeFourthHit_)
+        if (hits.size() > 3 and not includeFourthHit_) {
+          std::cout << "MR SeedGeneratorFromProtoTracksEDProducer track with more than 3 hits shortened to 3"
+                    << std::endl;
           seedCreator_.makeSeed(*result, {hits[0], hits[1], hits[2]});
-        else
+        } else {
+          std::cout << "MR SeedGeneratorFromProtoTracksEDProducer track with " << hits.size() << " added." << std::endl;
           seedCreator_.makeSeed(*result, hits);
+        }
       }
     }
   }
 
+  std::cout << "MR SeedGeneratorFromProtoTracksEDProducer: adding " << result->size() << " seeds" << std::endl;
   ev.put(std::move(result));
   if (produceComplement_)
     ev.put(std::move(leftTracks));

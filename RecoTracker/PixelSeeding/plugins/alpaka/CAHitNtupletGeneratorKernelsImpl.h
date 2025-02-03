@@ -1,8 +1,8 @@
 #ifndef RecoTracker_PixelSeeding_plugins_alpaka_CAHitNtupletGeneratorKernelsImpl_h
 #define RecoTracker_PixelSeeding_plugins_alpaka_CAHitNtupletGeneratorKernelsImpl_h
 
-//#define GPU_DEBUG
-//#define NTUPLE_DEBUG
+#define GPU_DEBUG
+#define NTUPLE_DEBUG
 
 // C++ includes
 #include <cmath>
@@ -177,9 +177,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::caHitNtupletGeneratorKernels {
 
       for (auto idx : cms::alpakatools::uniform_elements(acc, *nCells)) {
         auto const &thisCell = cells[idx];
-        if (!thisCell.isKilled())
+        if (!thisCell.isKilled()) {
+          printf("cell killed by earlyFishbone\n");
           continue;
-
+        }
         for (auto it : thisCell.tracks())
           tracks_view[it].quality() = reject;
       }
@@ -405,14 +406,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::caHitNtupletGeneratorKernels {
       for (auto idx : cms::alpakatools::uniform_elements(acc, (*nCells))) {
         auto const &thisCell = cells[idx];
 
+        printf("working on cell %d inner: %d, outer: %d\n", idx, cells[idx].inner_hit_id(), cells[idx].outer_hit_id());
         // cut by earlyFishbone
-        if (thisCell.isKilled())
+        if (thisCell.isKilled()) {
+          printf("cell %d killed by earlyFishbone\n", idx);
           continue;
-
+        }
         // we require at least three hits
-        if (thisCell.outerNeighbors().empty())
+        if (thisCell.outerNeighbors().empty()) {
+          printf("too few cells, at least 3 needed\n");
           continue;
-
+        }
         auto pid = thisCell.layerPairId();
         bool doit = params.startingLayerPair(pid);
 

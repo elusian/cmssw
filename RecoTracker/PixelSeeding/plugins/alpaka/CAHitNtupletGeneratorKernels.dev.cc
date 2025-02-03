@@ -1,7 +1,4 @@
 // C++ headers
-#ifdef DUMP_GPU_TK_TUPLES
-#include <mutex>
-#endif
 
 // Alpaka headers
 #include <alpaka/alpaka.hpp>
@@ -17,8 +14,12 @@
 #include "CAHitNtupletGeneratorKernels.h"
 #include "CAHitNtupletGeneratorKernelsImpl.h"
 
-//#define GPU_DEBUG
-//#define NTUPLE_DEBUG
+#ifdef DUMP_GPU_TK_TUPLES
+#include <mutex>
+#endif
+
+#define GPU_DEBUG
+#define NTUPLE_DEBUG
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
