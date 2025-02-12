@@ -299,6 +299,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       // the ntuplets is then saved if the number of hits it contains is greater
       // than a threshold
 
+      printf("find_ntuplets at depth %d\n", DEPTH);
+      printf("inner: %d, outer: %d\n", inner_hit_id(), outer_hit_id());
       if constexpr (DEPTH <= 0) {
         printf("ERROR: CACellT::find_ntuplets reached full depth!\n");
         ALPAKA_ASSERT_ACC(false);
@@ -309,8 +311,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
         bool last = true;
         for (unsigned int otherCell : outerNeighbors()) {
-          if (cells[otherCell].isKilled())
+          if (cells[otherCell].isKilled()) {
+            printf("cell %d is killed by earlyFishbone\n", otherCell);
             continue;  // killed by earlyFishbone
+          }
           last = false;
           cells[otherCell].template find_ntuplets<DEPTH - 1>(
               acc, hh, cells, cellTracks, foundNtuplets, apc, quality, tmpNtuplet, minHitsPerNtuplet, startAt0);
@@ -323,6 +327,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                 ((!startAt0) && hole0(hh, cells[tmpNtuplet[0]])))
 #endif
             {
+              printf("saving ntuplet with %d cells\n", tmpNtuplet.size());
               hindex_type hits[TrackerTraits::maxDepth + 2];
               auto nh = 0U;
               constexpr int maxFB = 2;  // for the time being let's limit this
@@ -343,6 +348,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                 quality[it] = bad;  // initialize to bad
               }
             }
+          } else {
+            printf("too short ntuplet: %d\n", tmpNtuplet.size());
           }
         }
         tmpNtuplet.pop_back();

@@ -50,6 +50,8 @@ namespace {
     const edm::EDGetTokenT<QualityMaskCollection> originalQualValsToken_;
 
     const reco::TrackBase::TrackQuality minQuality_;
+
+    const std::string alias_;
   };
 }  // namespace
 
@@ -82,7 +84,8 @@ namespace {
         originalMVAValsToken_(consumes<MVACollection>(iConfig.getParameter<edm::InputTag>("originalMVAVals"))),
         originalQualValsToken_(
             consumes<QualityMaskCollection>(iConfig.getParameter<edm::InputTag>("originalQualVals"))),
-        minQuality_(reco::TrackBase::qualityByName(iConfig.getParameter<std::string>("minQuality"))) {
+        minQuality_(reco::TrackBase::qualityByName(iConfig.getParameter<std::string>("minQuality"))),
+        alias_(iConfig.getParameter<std::string>("@module_label")) {
     produces<MVACollection>("MVAValues");
     produces<QualityMaskCollection>("QualityMasks");
   }
@@ -141,6 +144,8 @@ namespace {
     assert(producer.selTracks_->size() == pmvas->size());
     assert(producer.selTracks_->size() == pquals->size());
 
+    std::cout << "MR TrackCollectionFilterCloner adding " << producer.selTracks_->size() << " tracks with alias "
+              << alias_ << std::endl;
     iEvent.put(std::move(pmvas), "MVAValues");
     iEvent.put(std::move(pquals), "QualityMasks");
   }

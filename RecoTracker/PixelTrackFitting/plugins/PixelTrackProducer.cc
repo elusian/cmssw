@@ -65,6 +65,7 @@ public:
     auto htTopo = es.getData(htTopoToken_);
 
     // store tracks
+    std::cout << "MR PixelTrackProducer adding " << tracks.size() << " pixelTracks." << std::endl;
     storeTracks(ev, tracks, htTopo);
   }
 

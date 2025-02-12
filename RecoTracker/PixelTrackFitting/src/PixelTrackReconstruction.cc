@@ -75,6 +75,7 @@ void PixelTrackReconstruction::run(TracksWithTTRHs& tracks, edm::Event& ev, cons
 
       if (filter) {
         if (!(*filter)(track.get(), hits)) {
+          std::cout << "MR dropping tracklets size: " << tuplet.size() << std::endl;
           continue;
         }
       }
@@ -87,6 +88,7 @@ void PixelTrackReconstruction::run(TracksWithTTRHs& tracks, edm::Event& ev, cons
       */
       // add tracks
       tracks.emplace_back(track.release(), tuplet);
+      std::cout << "MR adding tracklets size: " << tuplet.size() << std::endl;
     }
   }
 

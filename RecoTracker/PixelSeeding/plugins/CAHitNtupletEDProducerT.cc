@@ -82,8 +82,8 @@ void CAHitNtupletEDProducerT<T_Generator>::produce(edm::Event& iEvent, const edm
   seedingHitSets->reserve(regionDoublets.regionSize(), localRA_.upper());
   generator_.initEvent(iEvent, iSetup);
 
-  LogDebug("CAHitNtupletEDProducer") << "Creating ntuplets for " << regionDoublets.regionSize() << " regions, and "
-                                     << regionDoublets.layerPairsSize() << " layer pairs";
+  std::cout << "CAHitNtupletEDProducer" << "Creating ntuplets for " << regionDoublets.regionSize() << " regions, and "
+            << regionDoublets.layerPairsSize() << " layer pairs";
   std::vector<OrderedHitSeeds> ntuplets;
   ntuplets.resize(regionDoublets.regionSize());
   for (auto& ntuplet : ntuplets)
@@ -100,6 +100,8 @@ void CAHitNtupletEDProducerT<T_Generator>::produce(edm::Event& iEvent, const edm
     index++;
   }
   localRA_.update(seedingHitSets->size());
+
+  std::cout << "CAHitNtupletEDProducer" << "Created " << seedingHitSets->size() << " seeding hit sets" << std::endl;
 
   iEvent.put(std::move(seedingHitSets));
 }

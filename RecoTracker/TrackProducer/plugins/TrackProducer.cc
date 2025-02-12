@@ -140,6 +140,7 @@ void TrackProducer::produce(edm::Event& theEvent, const edm::EventSetup& setup) 
     }
   }
 
+  std::cout << "MR TrackProducer adding " << algoResults.size() << " tracks with alias " << alias_ << std::endl;
   //put everything in the event
   putInEvt(theEvent,
            thePropagator.product(),
