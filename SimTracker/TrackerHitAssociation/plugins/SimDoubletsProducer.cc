@@ -82,7 +82,7 @@ namespace simdoublets {
     } else if (detId.subdetId() == PixelSubdetector::PixelEndcap) {
       if (trackerTopology->pxfSide(detId) == 1) {
         // add 15 in the backward endcap to get from (1,12) to (16,27)
-        layerId = 15 + trackerTopology->pxfDisk(detId);
+        layerId = 6 + trackerTopology->pxfDisk(detId);
       } else {
         // add 3 in the forward endcap to get from (1,12) to (4,15)
         layerId = 3 + trackerTopology->pxfDisk(detId);
