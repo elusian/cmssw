@@ -24,7 +24,7 @@ def customizeHLTStripClustersFromRaw(process):
     return process
 
 
-def customizeHLTStripClustersFromRaw_alpaka(process: cms.Process, MaxClusterSize:int = 768, doNotReplaceInPath = []):
+def customizeHLTStripClustersFromRaw_alpaka(process: cms.Process, MaxClusterSize:int = 16, doNotReplaceInPath = []):
     if hasattr(process, 'hltSiStripRawToClustersFacility'):
         from RecoLocalTracker.SiStripZeroSuppression.DefaultAlgorithms_cff import DefaultAlgorithms
         from RecoLocalTracker.SiStripClusterizer.DefaultClusterizer_cff import DefaultClusterizer
