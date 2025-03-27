@@ -818,7 +818,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::sistrip {
     // (sistrip::STRIPS_PER_FED = 24576) * (sistrip::NUMBER_OF_FEDS = ) => 24576*440 = 10813440
     // Assume conditions cut this to 80%, then 10813440*0.8 = 8650752
     uint32_t threads =
-        512;  // I wonder if there is an helper function which automatically optimize this based on the accelerator properties
+        64;  // I wonder if there is an helper function which automatically optimize this based on the accelerator properties
     // use as many groups as needed to cover the whole problem
     auto nStrips = mapping->metadata().size();
     uint32_t groups = divide_up_by(nStrips, threads);
