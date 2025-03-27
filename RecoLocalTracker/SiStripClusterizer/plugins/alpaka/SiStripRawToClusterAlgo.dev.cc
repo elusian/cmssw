@@ -866,7 +866,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::sistrip {
     // In HeterogeneousCore/AlpakaTest, typical sizes are power of 2 like 32 and 64.
     // I wonder if there is an helper function which automatically optimize this based on the accelerator properties.
     // Most likely I could retrieve the device attached to the queue (alpaka::getDev(queue)) and then depending on its properties set the optimal threads
-    uint32_t threads = 512;
+    uint32_t threads = 64;
     auto nStrips = mapping->metadata().size();
     uint32_t groups = divide_up_by(nStrips, threads);
 
@@ -896,7 +896,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE::sistrip {
 
     // Calculate the prefix for the non-contiguous flagged strips and store in prefixSeedStripsNCMask
     uint32_t num_items = clustersAux_d_->view().metadata().size();
-    const auto nThreads = 1024;
+    const auto nThreads = 64;
     int32_t nBlocks = divide_up_by(num_items, nThreads);
     auto workDivMultiBlock = make_workdiv<Acc1D>(nBlocks, nThreads);
     auto blockCounter_d = make_device_buffer<int32_t>(queue);
