@@ -82,9 +82,9 @@ namespace mkfit {
         if (!traits.passCCC(charge))
           continue;
 
-        const auto& gpos = surf.toGlobal(parameters.first);
+        const auto& gpos = surf.toGlobal(recHitFiller.back().localPosition());
         SVector3 pos(gpos.x(), gpos.y(), gpos.z());
-        const auto& gerr = ErrorFrameTransformer::transform(parameters.second, surf);
+        const auto& gerr = ErrorFrameTransformer::transform(recHitFiller.back().localPositionError(), surf);
         SMatrixSym33 err{{float(gerr.cxx()),
           float(gerr.cyx()),
           float(gerr.cyy()),
