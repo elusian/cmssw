@@ -7,3 +7,11 @@ mkFitSiStripHitConverter = _mkFitSiStripHitConverterDefault.clone(
     minGoodStripCharge = cms.PSet(
         refToPSet_ = cms.string('SiStripClusterChargeCutLoose'))
 )
+
+from RecoTracker.MkFit.mkFitSiStripHitConverterFromClustersDefault_cfi import mkFitSiStripHitConverterFromClustersDefault as _mkFitSiStripHitConverterFromClustersDefault
+
+mkFitSiStripHitConverterFromClusters = _mkFitSiStripHitConverterFromClustersDefault.clone(
+    minGoodStripCharge = cms.PSet(
+        refToPSet_ = cms.string('SiStripClusterChargeCutLoose'))
+)
+
