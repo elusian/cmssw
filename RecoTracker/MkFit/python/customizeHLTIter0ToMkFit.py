@@ -237,6 +237,7 @@ def customizeHLTIter0ToMkFitNew(process):
         ttrhBuilder = ":hltESPTTRHBWithTrackAngle",
         StripCPE = "hltESPStripCPEfromTrackAngle:hltESPStripCPEfromTrackAngle",
         minGoodStripCharge = dict(refToPSet_ = 'HLTSiStripClusterChargeCutLoose'),
+        doMatching = cms.bool(False),
     )
     process.hltIter0PFlowCkfTrackCandidatesMkFitEventOfHits = mkFitEventOfHitsProducer_cfi.mkFitEventOfHitsProducer.clone(
         beamSpot  = "hltOnlineBeamSpot",
