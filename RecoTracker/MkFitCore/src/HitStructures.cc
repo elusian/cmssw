@@ -155,6 +155,10 @@ namespace mkfit {
     m_n_hits = 0;
 
     m_binnor.begin_registration(128);  // initial reserve for cons vectors
+
+    if (Config::usePhiQArrays) {
+      m_hit_infos.reserve(1000);
+    }
   }
 
   void LayerOfHits::registerHit(unsigned int idx) {
