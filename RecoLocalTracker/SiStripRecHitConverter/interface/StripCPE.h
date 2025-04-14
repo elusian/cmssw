@@ -39,6 +39,8 @@ public:
     float backplanecorrection;
     SiStripModuleGeometry moduleGeom;
     float coveredStrips(const LocalVector&, const LocalPoint&) const;
+    bool dsbOK;
+    float dsb;
   };
 
   struct AlgoParam {

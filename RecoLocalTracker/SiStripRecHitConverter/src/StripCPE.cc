@@ -63,9 +63,10 @@ StripClusterParameterEstimator::LocalValues StripCPE::localParameters(const SiSt
                                                                       const GeomDetUnit& det) const {
   StripCPE::Param const& p = param(det);
   const float barycenter = cluster.barycenter();
-  const float fullProjection =
-      p.coveredStrips(p.drift + LocalVector(0, 0, -p.thickness), p.topology->localPosition(barycenter));
-  const float strip = barycenter - 0.5f * (1.f - p.backplanecorrection) * fullProjection;
+  const float strip = barycenter - (p.dsbOK ? p.dsb
+                                            : 0.5f * (1.f - p.backplanecorrection) *
+                                                  p.coveredStrips(p.drift + LocalVector(0, 0, -p.thickness),
+                                                                  p.topology->localPosition(barycenter)));
 
   return std::make_pair(p.topology->localPosition(strip), p.topology->localError(strip, 1.f / 12.f));
 }
@@ -120,6 +121,20 @@ void StripCPE::fillParams() {
     p.nstrips = p.topology->nstrips();
     p.moduleGeom = SiStripDetId(stripdet->geographicalId()).moduleGeometry();
     p.backplanecorrection = BackPlaneCorrectionMap_.getBackPlaneCorrection(stripdet->geographicalId().rawId());
+
+    // dsb = strip-barycenter : expect to be mostly independent of barycenter
+    int aStrip[5] = {0, p.nstrips / 4, p.nstrips / 2, (3 * p.nstrips) / 4, p.nstrips};
+    float dsb0Max = 0;
+    float dsb0 = 0;
+    for (unsigned int i = 0; i < 5; i++) {
+      float dsb = (1.f - p.backplanecorrection) *
+                  p.coveredStrips(p.drift + LocalVector(0, 0, -p.thickness), p.topology->localPosition(aStrip[i]));
+      if (i == 0)
+        dsb0 = dsb;
+      dsb0Max = std::max(dsb0Max, std::abs(dsb - dsb0));
+    }
+    p.dsbOK = dsb0Max < 0.01;
+    p.dsb = 0.5 * dsb0;
 
     const TkRadialStripTopology* rtop =
         dynamic_cast<const TkRadialStripTopology*>(&stripdet->specificType().specificTopology());
