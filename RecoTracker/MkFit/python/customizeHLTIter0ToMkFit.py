@@ -10,6 +10,102 @@ import RecoTracker.MkFit.mkFitProducer_cfi as mkFitProducer_cfi
 import RecoTracker.MkFit.mkFitOutputConverter_cfi as mkFitOutputConverter_cfi
 import RecoLocalTracker.SiStripRecHitConverter.SiStripRecHitConverter_cfi as SiStripRecHitConverter_cfi
 
+def customizeHLTforTrackingIter0CKF(process):
+
+    # if any of the following objects does not exist, do not apply any customisation
+    for objLabel in [
+        'hltIter0PFlowCkfTrackCandidatesMkFitSeeds',
+    ]:
+        if not hasattr(process, objLabel):
+            print(f'# WARNING: customizeHLTforTrackingIter0CKF failed (object with label "{objLabel}" not found) - no customisation applied !')
+            return process
+
+    process.hltSiStripRawToClustersFacility.onDemand = True
+    try:
+        del process.hltSiStripRawToClustersFacility.Clusterizer.MaxClusterSize
+    except:
+        pass
+
+    process.hltIter0PFlowCkfTrackCandidates = cms.EDProducer( "CkfTrackCandidateMaker",
+        cleanTrajectoryAfterInOut = cms.bool( False ),
+        doSeedingRegionRebuilding = cms.bool( False ),
+        onlyPixelHitsForSeedCleaner = cms.bool( False ),
+        reverseTrajectories = cms.bool( False ),
+        useHitsSplitting = cms.bool( False ),
+        MeasurementTrackerEvent = cms.InputTag( "hltMeasurementTrackerEvent" ),
+        src = cms.InputTag( "hltIter0PFLowPixelSeedsFromPixelTracks" ),
+        clustersToSkip = cms.InputTag( "" ),
+        phase2clustersToSkip = cms.InputTag( "" ),
+        TrajectoryBuilderPSet = cms.PSet(  refToPSet_ = cms.string( "HLTIter0GroupedCkfTrajectoryBuilderIT" ) ),
+        TransientInitialStateEstimatorParameters = cms.PSet(
+          propagatorAlongTISE = cms.string( "PropagatorWithMaterialParabolicMf" ),
+          numberMeasurementsForFit = cms.int32( 4 ),
+          propagatorOppositeTISE = cms.string( "PropagatorWithMaterialParabolicMfOpposite" )
+        ),
+        numHitsForSeedCleaner = cms.int32( 4 ),
+        NavigationSchool = cms.string( "SimpleNavigationSchool" ),
+        RedundantSeedCleaner = cms.string( "CachingSeedCleanerBySharedInput" ),
+        TrajectoryCleaner = cms.string( "hltESPTrajectoryCleanerBySharedHits" ),
+        maxNSeeds = cms.uint32( 100000 ),
+        maxSeedsBeforeCleaning = cms.uint32( 1000 )
+    )
+
+    process.hltIter0PFlowCkfTrackCandidatesSerialSync = process.hltIter0PFlowCkfTrackCandidates.clone(
+        MeasurementTrackerEvent = "hltMeasurementTrackerEventSerialSync",
+        src = "hltIter0PFLowPixelSeedsFromPixelTracksSerialSync"
+    )
+
+    for modToRemove in [
+        'hltSiStripRecHits',
+        'hltIter0PFlowCkfTrackCandidatesMkFitSiStripHits',
+        'hltIter0PFlowCkfTrackCandidatesMkFitSiPixelHits',
+        'hltIter0PFlowCkfTrackCandidatesMkFitSiPixelHitsSerialSync',
+        'hltIter0PFlowCkfTrackCandidatesMkFitEventOfHits',
+        'hltIter0PFlowCkfTrackCandidatesMkFitEventOfHitsSerialSync',
+        'hltIter0PFlowCkfTrackCandidatesMkFitSeeds',
+        'hltIter0PFlowCkfTrackCandidatesMkFitSeedsSerialSync',
+        'hltIter0PFlowCkfTrackCandidatesMkFit',
+        'hltIter0PFlowCkfTrackCandidatesMkFitSerialSync',
+        'hltIter0PFlowTrackCandidatesMkFitConfig',
+        'mkFitGeometryESProducer'
+    ]:
+        if hasattr(process, modToRemove):
+            delattr(process, modToRemove)
+
+    # process.hltIter0PFlowTrackCutClassifier.mva.maxChi2 = cms.vdouble(9999.0, 25.0, 16.0)
+    # process.hltIter0PFlowTrackCutClassifier.mva.maxChi2n = cms.vdouble(1.2, 1.0, 0.7)
+    #
+    # process.hltIter0PFlowTrackCutClassifier.mva.dr_par = cms.PSet(
+    #     d0err = cms.vdouble( 0.003, 0.003, 0.003 ),
+    #     dr_par1 = cms.vdouble(3.40282346639e+38, 0.8, 0.8),
+    #     dr_par2 = cms.vdouble(3.40282346639e+38, 0.6, 0.6),
+    #     dr_exp = cms.vint32( 4, 4, 4 ),
+    #     d0err_par = cms.vdouble( 0.001, 0.001, 0.001 )
+    # )
+    # process.hltIter0PFlowTrackCutClassifier.mva.dz_par = cms.PSet(
+    #     dz_par1 = cms.vdouble(3.40282346639e+38, 0.75, 0.75),
+    #     dz_par2 = cms.vdouble(3.40282346639e+38, 0.5, 0.5),
+    #     dz_exp = cms.vint32( 4, 4, 4 )
+    # )
+    #
+    # if hasattr(process, 'hltIter0PFlowTrackCutClassifierSerialSync'):
+    #     process.hltIter0PFlowTrackCutClassifierSerialSync.mva.maxChi2 = cms.vdouble(9999.0, 25.0, 16.0)
+    #     process.hltIter0PFlowTrackCutClassifierSerialSync.mva.maxChi2n = cms.vdouble(1.2, 1.0, 0.7)
+    #     process.hltIter0PFlowTrackCutClassifierSerialSync.mva.dr_par = cms.PSet(
+    #         d0err = cms.vdouble( 0.003, 0.003, 0.003 ),
+    #         dr_par1 = cms.vdouble(3.40282346639e+38, 0.8, 0.8),
+    #         dr_par2 = cms.vdouble(3.40282346639e+38, 0.6, 0.6),
+    #         dr_exp = cms.vint32( 4, 4, 4 ),
+    #         d0err_par = cms.vdouble( 0.001, 0.001, 0.001 )
+    #     )
+    #     process.hltIter0PFlowTrackCutClassifierSerialSync.mva.dz_par = cms.PSet(
+    #         dz_par1 = cms.vdouble(3.40282346639e+38, 0.75, 0.75),
+    #         dz_par2 = cms.vdouble(3.40282346639e+38, 0.5, 0.5),
+    #         dz_exp = cms.vint32( 4, 4, 4 )
+    #     )
+
+    return process
+
 def customizeHLTIter0ToMkFit(process):
 
     # if any of the following objects does not exist, do not apply any customisation
