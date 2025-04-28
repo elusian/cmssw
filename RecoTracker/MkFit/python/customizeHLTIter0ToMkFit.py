@@ -211,9 +211,8 @@ def customizeHLTIter0ToMkFit(process):
         propagatorOpposite = ":PropagatorWithMaterialParabolicMfOpposite",
     )
 
-    process.HLTDoLocalStripSequence += process.hltSiStripRecHits
-
-    replaceWith = (process.hltIter0PFlowCkfTrackCandidatesMkFitSiPixelHits +
+    replaceWith = (process.hltSiStripRecHits +
+                   process.hltIter0PFlowCkfTrackCandidatesMkFitSiPixelHits +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitSiStripHits +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitEventOfHits +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitSeeds +
@@ -283,9 +282,9 @@ def customizeHLTIter0ToMkFit(process):
             dz_par2 = cms.vdouble( 3.40282346639E38, 0.51, 0.51 ),
             dz_exp = cms.vint32( 4, 4, 4 )
         )
-        process.HLTDoLocalStripSequenceSerialSync += process.hltSiStripRecHits
 
-        replaceWithSerialSync = (process.hltIter0PFlowCkfTrackCandidatesMkFitSiPixelHitsSerialSync +
+        replaceWithSerialSync = (process.hltSiStripRecHits +
+                   process.hltIter0PFlowCkfTrackCandidatesMkFitSiPixelHitsSerialSync +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitSiStripHits +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitEventOfHitsSerialSync +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitSeedsSerialSync +
