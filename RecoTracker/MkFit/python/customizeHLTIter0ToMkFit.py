@@ -211,9 +211,8 @@ def customizeHLTIter0ToMkFit(process):
         propagatorOpposite = ":PropagatorWithMaterialParabolicMfOpposite",
     )
 
-    process.HLTDoLocalStripSequence += process.hltSiStripRecHits
-
-    replaceWith = (process.hltIter0PFlowCkfTrackCandidatesMkFitSiPixelHits +
+    replaceWith = (process.hltSiStripRecHits +
+                   process.hltIter0PFlowCkfTrackCandidatesMkFitSiPixelHits +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitSiStripHits +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitEventOfHits +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitSeeds +
