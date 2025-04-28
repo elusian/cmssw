@@ -156,7 +156,7 @@ def customizeHLTIter0ToMkFit(process):
     process.hltSiStripRawToClustersFacilityFull.Clusterizer.MaxClusterSize = 16
 
     process.hltSiStripRecHits = SiStripRecHitConverter_cfi.siStripMatchedRecHits.clone(
-        ClusterProducer = "hltSiStripRawToClustersFacility",
+        ClusterProducer = "hltSiStripRawToClustersFacilityFull",
         StripCPE = "hltESPStripCPEfromTrackAngle:hltESPStripCPEfromTrackAngle",
         doMatching = False,
     )
@@ -174,7 +174,7 @@ def customizeHLTIter0ToMkFit(process):
     process.hltIter0PFlowCkfTrackCandidatesMkFitSiStripHits = mkFitSiStripHitConverter_cfi.mkFitSiStripHitConverter.clone(
         rphiHits = "hltSiStripRecHits:rphiRecHit",
         stereoHits = "hltSiStripRecHits:stereoRecHit",
-        clusters = "hltSiStripRawToClustersFacility",
+        clusters = "hltSiStripRawToClustersFacilityFull",
         ttrhBuilder = ":hltESPTTRHBWithTrackAngle",
         minGoodStripCharge = dict(refToPSet_ = 'HLTSiStripClusterChargeCutLoose'),
     )
