@@ -120,7 +120,7 @@ def customizeHLTIter0ToMkFit(process):
             return process
 
     # mkFit needs all clusters, so switch off the on-demand mode
-    process.hltSiStripRawToClustersFacility = cms.EDProducer(
+    process.hltSiStripRawToClustersFacilityFull = cms.EDProducer(
         "SiStripClusterizerFromRaw",
         ProductLabel = cms.InputTag( "rawDataCollector" ),
         ConditionsLabel = cms.string( "" ),
@@ -152,8 +152,8 @@ def customizeHLTIter0ToMkFit(process):
             PedestalSubtractionFedMode = cms.bool( True )
         )
     )
-    process.hltSiStripRawToClustersFacility.onDemand = False
-    process.hltSiStripRawToClustersFacility.Clusterizer.MaxClusterSize = 16
+    process.hltSiStripRawToClustersFacilityFull.onDemand = False
+    process.hltSiStripRawToClustersFacilityFull.Clusterizer.MaxClusterSize = 16
 
     process.hltSiStripRecHits = SiStripRecHitConverter_cfi.siStripMatchedRecHits.clone(
         ClusterProducer = "hltSiStripRawToClustersFacility",
@@ -211,7 +211,8 @@ def customizeHLTIter0ToMkFit(process):
         propagatorOpposite = ":PropagatorWithMaterialParabolicMfOpposite",
     )
 
-    replaceWith = (process.hltSiStripRecHits +
+    replaceWith = (process.hltSiStripRawToClustersFacilityFull + 
+                   process.hltSiStripRecHits +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitSiPixelHits +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitSiStripHits +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitEventOfHits +
@@ -283,7 +284,8 @@ def customizeHLTIter0ToMkFit(process):
             dz_exp = cms.vint32( 4, 4, 4 )
         )
 
-        replaceWithSerialSync = (process.hltSiStripRecHits +
+        replaceWithSerialSync = (process.hltSiStripRawToClustersFacilityFull +
+                                 process.hltSiStripRecHits +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitSiPixelHitsSerialSync +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitSiStripHits +
                    process.hltIter0PFlowCkfTrackCandidatesMkFitEventOfHitsSerialSync +
