@@ -627,6 +627,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         alpaka::wait(queue);
         auto moduleStartFirstElement = cms::alpakatools::make_device_view(queue, clusters_d->view().moduleStart(), 1u);
         alpaka::memcpy(queue, nModules_Clusters_h, moduleStartFirstElement);
+	alpaka::wait(queue);
 
         const auto elementsPerBlockFindClus = FindClus<TrackerTraits, ImageType>::maxElementsPerBlock;
         const auto workDivMaxNumModules =
