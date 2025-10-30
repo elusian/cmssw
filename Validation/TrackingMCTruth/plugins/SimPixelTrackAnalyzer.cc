@@ -417,7 +417,7 @@ SimPixelTrackAnalyzer<TrackerTraits>::SimPixelTrackAnalyzer(const edm::Parameter
   // resize other vectors according to number of layers
   // set the number of layers of the extension
   int numLayersOTBarrel = (iConfig.getParameter<bool>("includeOTBarrel")) ? 3 : 0;
-  int numLayersOTDisks = (iConfig.getParameter<int>("includeOTDisks")) ? 5 : 0;
+  int numLayersOTDisks = (iConfig.getParameter<bool>("includeOTDisks")) ? 5 : 0;
   numLayers_ = TrackerTraits::numberOfLayers + 2 * numLayersOTDisks + numLayersOTBarrel;
   hVector_caThetaCut_.resize(numLayers_);
   hVector_caDCACut_.resize(numLayers_);
@@ -2067,7 +2067,7 @@ void SimPixelTrackAnalyzer<pixelTopology::Phase1>::fillDescriptions(edm::Configu
   simdoublets::fillDescriptionsCommon<pixelTopology::Phase1>(desc);
 
   // input source for SimPixelTrack
-  desc.add<edm::InputTag>("simPixelTrackSrc", edm::InputTag("simPixelTrackProducerPhase1"));
+  desc.add<edm::InputTag>("simPixelTracksSrc", edm::InputTag("simPixelTrackProducerPhase1"));
 
   // cutting parameters
   desc.add<int>("minYsizeB1", 36)->setComment("Minimum cluster size for inner RecHit from B1");
@@ -2149,7 +2149,7 @@ void SimPixelTrackAnalyzer<pixelTopology::Phase2>::fillDescriptions(edm::Configu
   simdoublets::fillDescriptionsCommon<pixelTopology::Phase2>(desc);
 
   // input source for SimPixelTrack
-  desc.add<edm::InputTag>("simPixelTrackSrc", edm::InputTag("simPixelTrackProducerPhase2"));
+  desc.add<edm::InputTag>("simPixelTracksSrc", edm::InputTag("simPixelTrackProducerPhase2"));
 
   // cutting parameters for doublets
   desc.add<int>("minYsizeB1", 25)->setComment("Minimum cluster size for inner RecHit from B1");

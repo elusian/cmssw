@@ -130,6 +130,54 @@ template <typename TrackerTraits>
 void SimPixelTrackFromRecoTrackProducer<TrackerTraits>::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
 }
 
+// Phase 1 fillDescription
+template <>
+void SimPixelTrackFromRecoTrackProducer<pixelTopology::Phase1>::fillDescriptions(
+  edm::ConfigurationDescriptions& descriptions) {
+  edm::ParameterSetDescription desc;
+
+  // cluster parameter estimator
+  std::string cpe = "PixelCPEFastParams";
+  cpe += pixelTopology::Phase1::nameModifier;
+  desc.add<std::string>("CPE", cpe)
+  ->setComment("Cluster Parameter Estimator (needed for calculating the cluster size)");
+
+  // sources for cluster-TrackingParticle association, TrackingParticles, RecHits and the beamspot
+  desc.add<edm::InputTag>("pixelRecHitSrc", edm::InputTag("hltSiPixelRecHits"));
+  desc.add<edm::InputTag>("trackSrc", edm::InputTag("hltPixelTracks"));
+  desc.addUntracked<edm::InputTag>("trackAssociator", edm::InputTag("hltTrackAssociatorByHits"));
+  desc.add<edm::InputTag>("trackingParticleSrc", edm::InputTag("mix", "MergedTrackTruth"));
+  desc.add<edm::InputTag>("beamSpotSrc", edm::InputTag("hltOnlineBeamSpot"));
+
+  // Extension settings
+  desc.add<int>("numLayersOT", 0)->setComment("Number of additional layers from the OT extension.");
+  desc.add<bool>("includeFakeTracks", true)
+  ->setComment("If true, fake RecoTracks (such without any associated TrackingParticle) will be included.");
+  desc.add<bool>("includeTrueTracks", true)
+  ->setComment("If true, true RecoTracks (such with an associated TrackingParticle) will be included.");
+
+  // parameter set for the selection of TrackingParticles that will be used for SimHitDoublets
+  edm::ParameterSetDescription descTPSelector;
+  descTPSelector.add<double>("ptMin", 1e-3);
+  descTPSelector.add<double>("ptMax", 1e100);
+  descTPSelector.add<double>("minRapidity", -3);
+  descTPSelector.add<double>("maxRapidity", 3);
+  descTPSelector.add<double>("tip", 20.);  // NOTE: differs from HLT MultiTrackValidator
+  descTPSelector.add<double>("lip", 30.);
+  descTPSelector.add<int>("minHit", 0);
+  descTPSelector.add<bool>("signalOnly", false);
+  descTPSelector.add<bool>("intimeOnly", false);
+  descTPSelector.add<bool>("chargedOnly", true);
+  descTPSelector.add<bool>("stableOnly", false);
+  descTPSelector.add<std::vector<int>>("pdgId", {});
+  descTPSelector.add<bool>("invertRapidityCut", false);
+  descTPSelector.add<double>("minPhi", -3.2);
+  descTPSelector.add<double>("maxPhi", 3.2);
+  desc.add<edm::ParameterSetDescription>("TrackingParticleSelectionConfig", descTPSelector);
+
+  descriptions.addWithDefaultLabel(desc);
+  }
+
 // Phase 2 fillDescription
 template <>
 void SimPixelTrackFromRecoTrackProducer<pixelTopology::Phase2>::fillDescriptions(
@@ -310,5 +358,7 @@ void SimPixelTrackFromRecoTrackProducer<TrackerTraits>::produce(edm::Event& even
 
 // define two plugins for Phase 2
 using SimPixelTrackFromRecoTrackProducerPhase2 = SimPixelTrackFromRecoTrackProducer<pixelTopology::Phase2>;
+using SimPixelTrackFromRecoTrackProducerPhase1 = SimPixelTrackFromRecoTrackProducer<pixelTopology::Phase1>;
 
 DEFINE_FWK_MODULE(SimPixelTrackFromRecoTrackProducerPhase2);
+DEFINE_FWK_MODULE(SimPixelTrackFromRecoTrackProducerPhase1);
